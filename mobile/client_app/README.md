@@ -1,6 +1,9 @@
 # DemiResults Client App
 
-Flutter client app for iOS and Android.
+Client app workspace.
+
+- iOS: native SwiftUI app using Apple's built-in Liquid Glass APIs.
+- Android: Flutter app.
 
 ## What is included
 
@@ -12,17 +15,38 @@ Flutter client app for iOS and Android.
 - AI chat screen with product recommendations and product IDs.
 - Routine screen with daily care checklist.
 - Profile screen with theme switch, card binding placeholder, order history and consultation history buttons.
-- Cross-platform liquid glass UI built with `BackdropFilter`, translucent panels and animated bottom navigation.
+- iOS Liquid Glass UI built with `GlassEffectContainer` and `.glassEffect(...)`.
+- Android Flutter UI with a custom glass-like fallback.
 
-## Run
+## Run iOS native Liquid Glass app
 
-Flutter SDK is required.
+Requires Xcode with iOS 26 SDK.
 
 ```bash
 cd mobile/client_app
-flutter create . --platforms=ios,android
+xcodebuild \
+  -workspace ios/Runner.xcworkspace \
+  -scheme Runner \
+  -configuration Debug \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  build
+```
+
+Install and launch on the booted simulator:
+
+```bash
+xcrun simctl install booted ~/Library/Developer/Xcode/DerivedData/Runner-*/Build/Products/Debug-iphonesimulator/Runner.app
+xcrun simctl launch booted com.example.demiresultsClientApp
+```
+
+## Run Android Flutter app
+
+Flutter SDK is required. Android still uses `lib/main.dart`.
+
+```bash
+cd mobile/client_app
 flutter pub get
-flutter run
+flutter run -d android
 ```
 
 ## Backend connection
@@ -39,6 +63,13 @@ The current app uses demo data so the UI can be tested immediately. Next step is
 
 ## Liquid Glass note
 
-Apple's built-in Liquid Glass API is native SwiftUI/iOS-only and does not run on Android. For the shared Flutter app, the current implementation uses a custom cross-platform liquid glass effect.
+Apple's built-in Liquid Glass API is native SwiftUI/iOS-only and does not run on Android. The iOS Runner has been converted from Flutter-hosted UI to native SwiftUI so it can use:
 
-If a separate native iOS client is created later, use iOS 26+ SwiftUI APIs such as `GlassEffectContainer`, `.glassEffect(...)`, and `.buttonStyle(.glassProminent)` with availability fallbacks.
+```swift
+GlassEffectContainer {
+    Button("Shop") {}
+        .glassEffect()
+}
+```
+
+The SwiftUI code also keeps a fallback material style for older APIs inside helper modifiers.
