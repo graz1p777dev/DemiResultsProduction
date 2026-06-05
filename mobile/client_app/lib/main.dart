@@ -376,7 +376,7 @@ class HomeScreen extends StatelessWidget {
         AiQuestionCard(onTap: onOpenAi),
         SectionTitle(title: 'Популярное', action: 'Все', onAction: onOpenCatalog),
         SizedBox(
-          height: 320,
+          height: 340,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: products.length,
@@ -885,7 +885,7 @@ class HeroCareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      minHeight: 176,
+      constraints: const BoxConstraints(minHeight: 176),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: AppColors.navy,
@@ -1182,7 +1182,7 @@ class ProductGrid extends StatelessWidget {
       itemCount: products.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 14, crossAxisSpacing: 14, childAspectRatio: 0.57),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 14, crossAxisSpacing: 14, childAspectRatio: 0.53),
       itemBuilder: (context, index) {
         final product = products[index];
         return ProductCard(
@@ -1708,7 +1708,7 @@ class BadgeIconButton extends StatelessWidget {
             top: -5,
             right: -5,
             child: Container(
-              minWidth: 18,
+              constraints: const BoxConstraints(minWidth: 18),
               height: 18,
               alignment: Alignment.center,
               decoration: const BoxDecoration(color: AppColors.navy, shape: BoxShape.circle),
