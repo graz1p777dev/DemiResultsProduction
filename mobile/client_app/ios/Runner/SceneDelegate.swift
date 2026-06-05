@@ -23,6 +23,7 @@ private struct DemiResultsGlassApp: View {
     @State private var cartCount = 1
     @State private var favoriteIDs: Set<Int> = [1]
     @State private var selectedCategory = "Все"
+    @Namespace private var navGlassNamespace
 
     private let products = DemoProduct.samples
     private let categories = ["Все", "Увлажнение", "SPF", "Сыворотки", "Очищение"]
@@ -440,6 +441,7 @@ private struct DemiResultsGlassApp: View {
             }
             .padding(8)
             .nativeGlass(cornerRadius: 30)
+            .animation(.spring(response: 0.48, dampingFraction: 0.78, blendDuration: 0.08), value: selectedTab)
         }
     }
 
@@ -449,22 +451,36 @@ private struct DemiResultsGlassApp: View {
                 selectedTab = index
             }
         } label: {
-            VStack(spacing: 4) {
-                Image(systemName: systemName)
-                    .font(.system(size: prominent ? 18 : 20, weight: .bold))
-                    .frame(width: prominent ? 36 : 30, height: prominent ? 36 : 30)
-                    .foregroundStyle(prominent ? .demiAccent : (selectedTab == index ? .demiNavy : .demiMuted))
-                    .background(prominent ? .demiNavy : .clear, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                Text(title)
-                    .font(.system(size: 11, weight: .heavy))
-                    .foregroundStyle(selectedTab == index ? .demiNavy : .demiMuted)
+            ZStack {
+                if selectedTab == index {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .fill(.demiAccent.opacity(0.56))
+                        .matchedGeometryEffect(id: "active-nav-glass", in: navGlassNamespace)
+                        .movingGlassEffect(id: "active-nav-glass", namespace: navGlassNamespace, cornerRadius: 22)
+                        .shadow(color: .demiMid.opacity(0.18), radius: 22, x: 0, y: 8)
+                        .transition(.scale(scale: 0.92).combined(with: .opacity))
+                }
+
+                VStack(spacing: 4) {
+                    Image(systemName: systemName)
+                        .font(.system(size: prominent ? 18 : 20, weight: .bold))
+                        .frame(width: prominent ? 36 : 30, height: prominent ? 36 : 30)
+                        .foregroundStyle(prominent ? .demiAccent : (selectedTab == index ? .demiNavy : .demiMuted))
+                        .background(prominent ? .demiNavy : .clear, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .scaleEffect(selectedTab == index ? 1.08 : 1)
+                        .symbolEffect(.bounce, value: selectedTab == index)
+
+                    Text(title)
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(selectedTab == index ? .demiNavy : .demiMuted)
+                        .scaleEffect(selectedTab == index ? 1.02 : 1)
+                }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 58)
-            .background(selectedTab == index ? .demiAccent.opacity(0.52) : .clear, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         }
         .buttonStyle(.plain)
-        .nativeGlassIfAvailable(cornerRadius: 22)
     }
 
     private func glassIcon(systemName: String, badge: Int) -> some View {
@@ -598,6 +614,23 @@ private extension View {
             self.glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
         } else {
             self
+        }
+    }
+
+    @ViewBuilder
+    func movingGlassEffect(id: String, namespace: Namespace.ID, cornerRadius: CGFloat) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+                .glassEffectID(id, in: namespace)
+                .glassEffectTransition(.matchedGeometry)
+        } else {
+            self
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(.white.opacity(0.62), lineWidth: 1)
+                )
         }
     }
 }
