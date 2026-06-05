@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 from common.models import CreatedByModel, TimeStampedModel
 
@@ -23,6 +24,11 @@ class BonusTransaction(CreatedByModel):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     reason = models.CharField(max_length=255, blank=True)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=Q(amount__gt=0), name="bonus_transaction_amount_positive"),
+        ]
+
     def __str__(self):
         return f"{self.transaction_type} {self.amount}"
 
@@ -37,4 +43,3 @@ class PromoCode(CreatedByModel):
 
     def __str__(self):
         return self.code
-

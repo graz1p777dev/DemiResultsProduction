@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DemiResults Admin</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <span>D</span>
+        <div>
+          <strong>DemiResults</strong>
+          <small>Admin Panel</small>
+        </div>
+      </div>
+      <nav>
+        <button class="is-active" data-section="dashboard">Панель</button>
+        <button data-section="catalog">Каталог</button>
+        <button data-section="orders">Заказы</button>
+        <button data-section="inventory">Склад</button>
+        <button data-section="ai">AI / n8n</button>
+      </nav>
+      <div class="status-pill" id="apiStatus">API проверяется</div>
+    </aside>
+
+    <main class="workspace">
+      <header class="workspace-head">
+        <div>
+          <p class="eyebrow">DemiResults</p>
+          <h1>Операционная панель</h1>
+        </div>
+        <div class="head-actions">
+          <button class="ghost-btn" id="refreshBtn">Обновить</button>
+          <a class="primary-btn" href="http://localhost:8000/api/docs/" target="_blank" rel="noreferrer">Swagger</a>
+        </div>
+      </header>
+
+      <section class="section is-active" data-section-panel="dashboard">
+        <div class="metric-grid">
+          <article class="metric-card">
+            <span>Товары</span>
+            <strong id="metricProducts">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Заказы</span>
+            <strong id="metricOrders">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>Остаток</span>
+            <strong id="metricStock">0</strong>
+          </article>
+          <article class="metric-card">
+            <span>API</span>
+            <strong id="metricHealth">—</strong>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="panel wide">
+            <div class="panel-head">
+              <h2>Продажи и заказы</h2>
+              <span>live snapshot</span>
+            </div>
+            <div class="chart" id="chartBars"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Низкий остаток</h2>
+            </div>
+            <div class="stock-alerts" id="stockAlerts"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="section" data-section-panel="catalog">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Каталог</h2>
+            <input id="catalogSearch" type="search" placeholder="Поиск товара" />
+          </div>
+          <div class="table" id="productsTable"></div>
+        </div>
+      </section>
+
+      <section class="section" data-section-panel="orders">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Заказы клиентов</h2>
+            <span id="ordersCount">0 записей</span>
+          </div>
+          <div class="kanban" id="ordersBoard"></div>
+        </div>
+      </section>
+
+      <section class="section" data-section-panel="inventory">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Склад</h2>
+            <span>остатки по каталогу</span>
+          </div>
+          <div class="inventory-list" id="inventoryList"></div>
+        </div>
+      </section>
+
+      <section class="section" data-section-panel="ai">
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>n8n webhook</h2>
+            </div>
+            <div class="integration-card">
+              <span class="pulse"></span>
+              <div>
+                <strong>Подпись HMAC включена</strong>
+                <p>Webhook принимает только token + signature.</p>
+              </div>
+            </div>
+          </section>
+          <section class="panel wide">
+            <div class="panel-head">
+              <h2>AI задачи</h2>
+            </div>
+            <div class="task-list">
+              <article><strong>Подбор ухода</strong><span>по skin card клиента</span></article>
+              <article><strong>Поиск товара</strong><span>только безопасный catalog payload</span></article>
+              <article><strong>Передача сотруднику</strong><span>история сохраняется в backend</span></article>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

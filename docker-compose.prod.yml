@@ -8,6 +8,8 @@ services:
     volumes:
       - backend_media:/app/media
       - backend_static:/app/staticfiles
+      - backend_backups:/app/backups
+      - backend_logs:/app/logs
     depends_on:
       - db
       - redis
@@ -18,6 +20,21 @@ services:
     command: celery -A core worker -l info
     env_file:
       - .env
+    volumes:
+      - backend_backups:/app/backups
+      - backend_logs:/app/logs
+    depends_on:
+      - redis
+
+  celery-beat:
+    build:
+      context: ./backend
+    command: celery -A core beat -l info
+    env_file:
+      - .env
+    volumes:
+      - backend_backups:/app/backups
+      - backend_logs:/app/logs
     depends_on:
       - redis
 
@@ -46,4 +63,5 @@ volumes:
   postgres_data:
   backend_media:
   backend_static:
-
+  backend_backups:
+  backend_logs:

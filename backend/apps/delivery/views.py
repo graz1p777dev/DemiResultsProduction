@@ -13,6 +13,12 @@ class AddressViewSet(CreatedByModelViewSet):
     permission_classes = [IsAuthenticated]
     filterset_fields = ["client", "city", "is_default"]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.is_superuser or self.request.user.role in {"OWNER", "ADMIN", "MANAGER", "CASHIER"}:
+            return queryset
+        return queryset.filter(client=self.request.user)
+
 
 class DeliveryZoneViewSet(CreatedByModelViewSet):
     queryset = DeliveryZone.objects.all()
@@ -26,3 +32,8 @@ class DeliveryViewSet(CreatedByModelViewSet):
     permission_classes = [IsStaffOperator]
     filterset_fields = ["status", "courier", "zone"]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.is_superuser or self.request.user.role in {"OWNER", "ADMIN", "MANAGER", "CASHIER", "WAREHOUSE"}:
+            return queryset
+        return queryset.filter(order__client=self.request.user)

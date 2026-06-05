@@ -7,6 +7,9 @@ __pycache__/
 *.sqlite3
 media/
 staticfiles/
+backups/
+logs/
+celerybeat-schedule
 .pytest_cache/
 .mypy_cache/
 .coverage
@@ -16,4 +19,3 @@ dist/
 build/
 .idea/
 .vscode/
-

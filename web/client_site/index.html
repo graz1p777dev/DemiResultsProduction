@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>DemiResults Client</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="phone-shell" aria-label="DemiResults client app">
+      <section class="screen is-active" data-screen="home">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">DemiResults</p>
+            <h1>Ваш персональный уход</h1>
+          </div>
+          <button class="icon-btn" data-action="refresh" aria-label="Обновить">
+            <span>↻</span>
+          </button>
+        </header>
+
+        <section class="hero-card">
+          <div class="hero-copy">
+            <p>AI-подбор</p>
+            <h2>Соберите рутину под состояние кожи</h2>
+            <button class="primary-btn" data-nav="ai">Открыть AI</button>
+          </div>
+          <div class="bottle-scene" aria-hidden="true">
+            <div class="bottle tall"></div>
+            <div class="bottle small"></div>
+            <div class="drop"></div>
+          </div>
+        </section>
+
+        <section class="stats-row">
+          <article>
+            <strong id="homeBonus">0</strong>
+            <span>бонусов</span>
+          </article>
+          <article>
+            <strong id="homeConsultTime">—</strong>
+            <span>консультация</span>
+          </article>
+          <article>
+            <strong id="homeRoutineDone">0/8</strong>
+            <span>уход сегодня</span>
+          </article>
+        </section>
+
+        <section class="ai-question-card" data-nav="ai">
+          <div class="ai-mark" aria-hidden="true">✦</div>
+          <div>
+            <p class="eyebrow">AI-консультант</p>
+            <h2>Что беспокоит вашу кожу?</h2>
+            <span>Опишите жалобу и получите подбор средств из каталога.</span>
+          </div>
+        </section>
+
+        <section class="section-head">
+          <h2>Популярное</h2>
+          <button data-nav="catalog">Все</button>
+        </section>
+        <div class="horizontal-products" id="homeProducts"></div>
+
+        <section class="section-head inline">
+          <h2>Акции</h2>
+        </section>
+        <div class="promo-row">
+          <article>
+            <strong>-15% на SPF</strong>
+            <span>при заказе с AI-рекомендацией</span>
+          </article>
+          <article>
+            <strong>250 бонусов</strong>
+            <span>за первую консультацию</span>
+          </article>
+        </div>
+
+        <section class="routine-strip" data-nav="routine">
+          <div>
+            <p class="eyebrow">Сегодня</p>
+            <h2>Утренний уход</h2>
+            <span id="routineProgressText">0 из 4 выполнено</span>
+          </div>
+          <div class="progress-ring" id="routineRing" aria-hidden="true">0%</div>
+        </section>
+      </section>
+
+      <section class="screen" data-screen="catalog">
+        <header class="topbar compact">
+          <div>
+            <p class="eyebrow">Каталог</p>
+            <h1>Средства</h1>
+          </div>
+          <div class="top-actions">
+            <button class="icon-btn badge-btn" data-nav="favorites" aria-label="Избранное">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20.1 5.9a5.1 5.1 0 0 0-7.2 0l-.9.9-.9-.9a5.1 5.1 0 0 0-7.2 7.2l.9.9 7.2 7.2 7.2-7.2.9-.9a5.1 5.1 0 0 0 0-7.2Z" />
+              </svg>
+              <em id="favoriteBadge" data-favorite-count>0</em>
+            </button>
+            <button class="icon-btn badge-btn cart-shortcut" data-nav="cart" aria-label="Корзина">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6.4 7.5h11.2l-1 8.2a2 2 0 0 1-2 1.8H9.4a2 2 0 0 1-2-1.8l-1-8.2Z" />
+                <path d="M9 7.5a3 3 0 0 1 6 0" />
+                <path d="M9.2 20h.1M14.7 20h.1" />
+              </svg>
+              <em id="cartBadge" data-cart-count>0</em>
+            </button>
+          </div>
+        </header>
+        <label class="search-field">
+          <span>⌕</span>
+          <input id="catalogSearch" type="search" placeholder="Поиск по уходу" autocomplete="off" />
+        </label>
+        <div class="chip-row" id="categoryChips"></div>
+        <div class="product-list" id="catalogProducts"></div>
+      </section>
+
+      <section class="screen" data-screen="favorites">
+        <header class="topbar compact">
+          <button class="icon-btn back-btn" data-nav="catalog" aria-label="Назад">‹</button>
+          <div>
+            <p class="eyebrow">Избранное</p>
+            <h1>Любимые средства</h1>
+          </div>
+          <button class="icon-btn badge-btn cart-shortcut" data-nav="cart" aria-label="Корзина">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.4 7.5h11.2l-1 8.2a2 2 0 0 1-2 1.8H9.4a2 2 0 0 1-2-1.8l-1-8.2Z" />
+              <path d="M9 7.5a3 3 0 0 1 6 0" />
+              <path d="M9.2 20h.1M14.7 20h.1" />
+            </svg>
+            <em data-cart-count>0</em>
+          </button>
+        </header>
+        <div class="product-list favorites-list" id="favoriteProducts"></div>
+      </section>
+
+      <section class="screen" data-screen="ai">
+        <header class="topbar compact">
+          <div>
+            <p class="eyebrow">AI-консультант</p>
+            <h1>Skincare assistant</h1>
+          </div>
+        </header>
+        <section class="ai-orb-card">
+          <div class="ai-orb" aria-hidden="true"></div>
+          <div>
+            <h2>Персональный план ухода</h2>
+            <p>AI анализирует skin card, историю заказов и каталог, чтобы предложить понятную рутину.</p>
+          </div>
+        </section>
+        <div class="chat-thread" id="aiThread">
+          <article class="chat-bubble ai">Расскажите, что сейчас беспокоит кожу: сухость, высыпания, пигментация или чувствительность?</article>
+          <article class="chat-bubble user">Хочу мягкий уход и SPF на каждый день.</article>
+          <article class="chat-bubble ai">Начнём с очищения, восстановления барьера и ежедневного SPF. Я добавила подходящие средства в рекомендации.</article>
+        </div>
+        <form class="ai-compose" id="aiForm">
+          <input id="aiInput" type="text" placeholder="Спросить про уход" />
+          <button type="submit">↑</button>
+        </form>
+      </section>
+
+      <section class="screen" data-screen="cart">
+        <header class="topbar compact">
+          <button class="icon-btn back-btn" data-nav="catalog" aria-label="Назад">‹</button>
+          <div>
+            <p class="eyebrow">Корзина</p>
+            <h1>Ваш заказ</h1>
+          </div>
+        </header>
+        <div class="cart-list" id="cartItems"></div>
+        <section class="checkout-card">
+          <div>
+            <span>Итого</span>
+            <strong id="cartTotal">0 сом</strong>
+          </div>
+          <button class="primary-btn" id="checkoutBtn">Оформить</button>
+        </section>
+        <section class="checkout-form">
+          <label>
+            Адрес доставки
+            <input id="deliveryAddress" type="text" placeholder="Бишкек, улица, дом, квартира" />
+          </label>
+          <label>
+            Карта
+            <select id="paymentCard">
+              <option value="local">Локальная карта •••• 2026</option>
+              <option value="new">Привязать новую карту</option>
+            </select>
+          </label>
+        </section>
+      </section>
+
+      <section class="screen" data-screen="routine">
+        <header class="topbar compact">
+          <div>
+            <p class="eyebrow">Уход</p>
+            <h1>Ваш план</h1>
+          </div>
+        </header>
+        <section class="routine-hero">
+          <div>
+            <h1>Мой уход</h1>
+            <p id="routineDate">Пятница, 5 июня</p>
+            <span>Прогресс сегодня</span>
+            <strong id="routineHeroProgress">0 из 8</strong>
+          </div>
+          <div class="progress-ring large" id="routineRingLarge">0%</div>
+        </section>
+        <div class="routine-list" id="routineList"></div>
+        <section class="section-head inline">
+          <h2>Запись к консультанту</h2>
+          <button data-nav="consultations">Открыть</button>
+        </section>
+        <div class="timeline" id="routineConsultationsList"></div>
+      </section>
+
+      <section class="screen" data-screen="consultations">
+        <header class="topbar compact">
+          <div>
+            <p class="eyebrow">Консультации</p>
+            <h1>Косметолог и AI</h1>
+          </div>
+        </header>
+        <form class="consult-form" id="consultForm">
+          <label>
+            Дата и время
+            <input type="datetime-local" id="consultDate" required />
+          </label>
+          <label>
+            Жалоба
+            <textarea id="consultConcern" rows="4" placeholder="Сухость, акне, пигментация..."></textarea>
+          </label>
+          <button class="primary-btn" type="submit">Записаться</button>
+        </form>
+        <div class="timeline" id="consultationsList"></div>
+      </section>
+
+      <section class="screen" data-screen="profile-orders">
+        <header class="topbar compact">
+          <button class="icon-btn back-btn" data-nav="profile" aria-label="Назад">‹</button>
+          <div>
+            <p class="eyebrow">Профиль</p>
+            <h1>История заказов</h1>
+          </div>
+        </header>
+        <div class="timeline" id="profileOrdersScreen"></div>
+      </section>
+
+      <section class="screen" data-screen="profile-consultations">
+        <header class="topbar compact">
+          <button class="icon-btn back-btn" data-nav="profile" aria-label="Назад">‹</button>
+          <div>
+            <p class="eyebrow">Профиль</p>
+            <h1>История консультаций</h1>
+          </div>
+        </header>
+        <div class="timeline" id="profileConsultationsScreen"></div>
+      </section>
+
+      <section class="screen" data-screen="profile">
+        <header class="profile-head">
+          <div class="avatar" aria-hidden="true">D</div>
+          <div>
+            <p class="eyebrow">Профиль</p>
+            <h1 id="profileName">Клиент</h1>
+            <span id="profilePhone">+996</span>
+          </div>
+        </header>
+        <form class="profile-card" id="profileForm">
+          <label>
+            Имя
+            <input id="firstName" type="text" placeholder="Имя" />
+          </label>
+          <label>
+            Тип кожи
+            <select id="skinType">
+              <option value="">Не выбрано</option>
+              <option value="dry">Сухая</option>
+              <option value="normal">Нормальная</option>
+              <option value="combination">Комбинированная</option>
+              <option value="oily">Жирная</option>
+              <option value="sensitive">Чувствительная</option>
+            </select>
+          </label>
+          <label>
+            Особенности
+            <textarea id="skinConcerns" rows="3" placeholder="Акне, сухость, покраснения"></textarea>
+          </label>
+          <button class="primary-btn" type="submit">Сохранить</button>
+        </form>
+        <section class="bonus-card">
+          <span>Бонусный баланс</span>
+          <strong id="bonusBalance">0 сом</strong>
+        </section>
+        <section class="profile-stack">
+          <article class="profile-section">
+            <div class="section-head inline">
+              <h2>История заказов</h2>
+            </div>
+            <button class="profile-link" data-nav="profile-orders">
+              <span>Открыть историю</span>
+              <strong id="orderHistoryCount">0 заказов</strong>
+            </button>
+          </article>
+          <article class="profile-section">
+            <div class="section-head inline">
+              <h2>История консультаций</h2>
+            </div>
+            <button class="profile-link" data-nav="profile-consultations">
+              <span>Открыть консультации</span>
+              <strong id="consultHistoryCount">0 записей</strong>
+            </button>
+          </article>
+          <article class="profile-section">
+            <div class="section-head inline">
+              <h2>Настройки темы</h2>
+            </div>
+            <div class="theme-toggle">
+              <button class="is-active" data-theme="light">Светлая</button>
+              <button data-theme="dark">Тёмная</button>
+            </div>
+          </article>
+          <article class="profile-section">
+            <div class="section-head inline">
+              <h2>Карта оплаты</h2>
+            </div>
+            <div class="card-binding">
+              <span>•••• 2026</span>
+              <strong>Локальная карта</strong>
+              <button type="button" id="bindCardBtn">Привязать карту</button>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <nav class="bottom-nav" aria-label="Основная навигация">
+        <div class="nav-liquid" aria-hidden="true"></div>
+        <button class="is-active" data-nav="home"><span>⌂</span><small>Главная</small></button>
+        <button data-nav="catalog"><span>□</span><small>Каталог</small></button>
+        <button class="ai-nav" data-nav="ai"><span>✦</span><small>AI</small></button>
+        <button data-nav="routine"><span>◌</span><small>Уход</small></button>
+        <button data-nav="profile"><span>○</span><small>Профиль</small></button>
+      </nav>
+    </main>
+
+    <section class="onboarding is-visible" id="onboarding">
+      <div class="onboarding-card">
+        <div class="ai-mark large" aria-hidden="true">✦</div>
+        <p class="eyebrow">DemiResults</p>
+        <h1>Персональный уход, каталог и AI в одном приложении</h1>
+        <p>Заполните skin card, добавляйте товары в корзину, записывайтесь на консультации и собирайте рутину.</p>
+        <button class="primary-btn" id="startOnboarding">Начать</button>
+      </div>
+    </section>
+
+    <section class="loading-overlay" id="loadingOverlay">
+      <div class="loading-card">
+        <div class="loader-liquid"></div>
+        <strong>Загружаем уход</strong>
+        <span>Синхронизируем каталог, бонусы и консультации</span>
+      </div>
+    </section>
+
+    <section class="product-modal" id="productModal" aria-hidden="true">
+      <article class="product-detail">
+        <button class="modal-close" id="closeProductModal">×</button>
+        <div class="detail-visual"><div class="detail-drop"></div></div>
+        <div class="detail-body" id="productDetailBody"></div>
+      </article>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>

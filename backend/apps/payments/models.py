@@ -22,8 +22,17 @@ class Payment(CreatedByModel):
     method = models.CharField(max_length=32, choices=Method.choices)
     status = models.CharField(max_length=32, choices=Status.choices, default=Status.PENDING)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
+    provider = models.CharField(max_length=64, default="local", db_index=True)
+    provider_reference = models.CharField(max_length=128, blank=True, db_index=True)
+    provider_payload = models.JSONField(default=dict, blank=True)
     external_id = models.CharField(max_length=128, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["status", "method"]),
+            models.Index(fields=["provider", "provider_reference"]),
+        ]
 
     def __str__(self):
         return f"{self.method} {self.amount} {self.status}"
@@ -36,4 +45,3 @@ class PaymentRefund(CreatedByModel):
 
     def __str__(self):
         return f"Refund {self.amount} for payment {self.payment_id}"
-

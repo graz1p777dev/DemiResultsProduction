@@ -1,0 +1,39 @@
+name: Backend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SECRET_KEY: ci-secret-key-with-enough-length-for-tests
+      DJANGO_DEBUG: "true"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      POSTGRES_DB: demiresults
+      POSTGRES_USER: demiresults
+      POSTGRES_PASSWORD: demiresults
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+      N8N_API_TOKEN: ci-token
+      N8N_WEBHOOK_SECRET: ci-secret
+      GOOGLE_CLIENT_ID: ci-google-client-id
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare env
+        run: cp .env.example .env
+      - name: Build backend
+        run: docker-compose build backend
+      - name: Check migrations
+        run: docker-compose run --rm backend python manage.py makemigrations --check --dry-run
+      - name: Migrate
+        run: docker-compose run --rm backend python manage.py migrate
+      - name: Django check
+        run: docker-compose run --rm backend python manage.py check
+      - name: Tests
+        run: docker-compose run --rm backend pytest -q
+      - name: OpenAPI validation
+        run: docker-compose run --rm backend python manage.py spectacular --file /tmp/schema.yml --validate

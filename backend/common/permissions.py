@@ -20,6 +20,13 @@ class IsStaffOperator(RolePermission):
     allowed_roles = {"OWNER", "ADMIN", "MANAGER", "CASHIER", "WAREHOUSE"}
 
 
+class IsSalesOperator(RolePermission):
+    allowed_roles = {"OWNER", "ADMIN", "MANAGER", "CASHIER"}
+
+
+class IsInventoryOperator(RolePermission):
+    allowed_roles = {"OWNER", "ADMIN", "MANAGER", "WAREHOUSE"}
+
+
 class IsClient(RolePermission):
     allowed_roles = {"CLIENT"}
-

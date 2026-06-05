@@ -16,7 +16,15 @@ class Notification(CreatedByModel):
     title = models.CharField(max_length=255)
     body = models.TextField()
     is_read = models.BooleanField(default=False)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivery_error = models.TextField(blank=True)
+    provider_reference = models.CharField(max_length=128, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "is_read"]),
+            models.Index(fields=["channel", "sent_at"]),
+        ]
 
     def __str__(self):
         return self.title
-

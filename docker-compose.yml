@@ -10,6 +10,8 @@ services:
     volumes:
       - ./backend:/app
       - backend_media:/app/media
+      - backend_backups:/app/backups
+      - backend_logs:/app/logs
     ports:
       - "8000:8000"
     depends_on:
@@ -24,6 +26,22 @@ services:
       - .env
     volumes:
       - ./backend:/app
+      - backend_backups:/app/backups
+      - backend_logs:/app/logs
+    depends_on:
+      - backend
+      - redis
+
+  celery-beat:
+    build:
+      context: ./backend
+    command: celery -A core beat -l info
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - backend_backups:/app/backups
+      - backend_logs:/app/logs
     depends_on:
       - backend
       - redis
@@ -45,4 +63,5 @@ services:
 volumes:
   postgres_data:
   backend_media:
-
+  backend_backups:
+  backend_logs:

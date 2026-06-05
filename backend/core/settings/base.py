@@ -8,6 +8,9 @@ ROOT_DIR = BASE_DIR.parent
 
 env = environ.Env(
     DJANGO_DEBUG=(bool, False),
+    PHONE_AUTH_CODE_TTL_MINUTES=(int, 5),
+    BACKUP_RETENTION_DAYS=(int, 7),
+    LOCAL_PAYMENT_AUTO_CAPTURE=(bool, False),
 )
 environ.Env.read_env(ROOT_DIR / ".env")
 
@@ -29,6 +32,7 @@ THIRD_PARTY_APPS = [
     "django_filters",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
 ]
 
@@ -46,6 +50,7 @@ LOCAL_APPS = [
     "apps.notifications",
     "apps.reports",
     "apps.audit",
+    "apps.client_api",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -97,7 +102,7 @@ AUTH_USER_MODEL = "users.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
@@ -142,13 +147,76 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "DemiResults API",
-    "DESCRIPTION": "Backend API for cosmetics store operations.",
+    "DESCRIPTION": "Backend API for cosmetics store operations: products, inventory, POS sales, orders, bonuses, consultations, AI assistant and audit.",
     "VERSION": "0.1.0",
+    "TAGS": [
+        {"name": "Auth", "description": "JWT authentication endpoints."},
+        {"name": "Users", "description": "Users, roles and client/staff profiles."},
+        {"name": "Products", "description": "Catalog, categories, brands, variants and batches."},
+        {"name": "Inventory", "description": "Branches, warehouses, stock levels and stock movements."},
+        {"name": "Sales", "description": "POS sales, sale items, returns, totals and profit."},
+        {"name": "Orders", "description": "Customer orders, items and status history."},
+        {"name": "Payments", "description": "Payments and refunds."},
+        {"name": "Delivery", "description": "Addresses, delivery zones and delivery status."},
+        {"name": "Bonuses", "description": "Bonus accounts, transactions and promo codes."},
+        {"name": "Consultations", "description": "Consultation bookings and messages."},
+        {"name": "AI Assistant", "description": "n8n webhook, AI conversations and AI messages."},
+        {"name": "Notifications", "description": "In-app, SMS, email and push notifications."},
+        {"name": "Reports", "description": "Excel exports for sales, inventory, orders and bonuses."},
+        {"name": "Audit", "description": "Read-only audit log for sensitive actions."},
+        {"name": "Health", "description": "Dependency health checks."},
+        {"name": "Me", "description": "Client-facing profile, orders, bonuses and consultations."},
+        {"name": "Catalog", "description": "Public client-facing product catalog."},
+    ],
+    "ENUM_NAME_OVERRIDES": {
+        "OrderStatusEnum": [
+            ("CREATED", "Created"),
+            ("CONFIRMED", "Confirmed"),
+            ("PACKING", "Packing"),
+            ("DELIVERING", "Delivering"),
+            ("COMPLETED", "Completed"),
+            ("CANCELLED", "Cancelled"),
+        ],
+        "SaleStatusEnum": [
+            ("DRAFT", "Draft"),
+            ("COMPLETED", "Completed"),
+            ("PARTIALLY_REFUNDED", "Partially refunded"),
+            ("REFUNDED", "Refunded"),
+            ("CANCELLED", "Cancelled"),
+        ],
+        "DeliveryStatusEnum": [
+            ("CREATED", "Created"),
+            ("ASSIGNED", "Assigned"),
+            ("DELIVERING", "Delivering"),
+            ("DELIVERED", "Delivered"),
+            ("CANCELLED", "Cancelled"),
+        ],
+        "PaymentStatusEnum": [
+            ("PENDING", "Pending"),
+            ("PAID", "Paid"),
+            ("FAILED", "Failed"),
+            ("REFUNDED", "Refunded"),
+        ],
+        "ConsultationStatusEnum": [
+            ("REQUESTED", "Requested"),
+            ("CONFIRMED", "Confirmed"),
+            ("COMPLETED", "Completed"),
+            ("CANCELLED", "Cancelled"),
+        ],
+        "StockMovementTypeEnum": [
+            ("IN", "Receipt"),
+            ("OUT", "Write-off"),
+            ("SALE", "Sale"),
+            ("RETURN", "Return"),
+            ("INVENTORY", "Inventory correction"),
+            ("TRANSFER", "Transfer"),
+        ],
+    },
 }
 
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
@@ -157,6 +225,70 @@ CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-old-report-exports-daily": {
+        "task": "apps.reports.tasks.cleanup_old_report_exports",
+        "schedule": 60 * 60 * 24,
+        "kwargs": {"days": 30},
+    },
+    "create-local-database-backup-daily": {
+        "task": "apps.reports.tasks.create_database_backup",
+        "schedule": 60 * 60 * 24,
+    },
+    "cleanup-local-database-backups-daily": {
+        "task": "apps.reports.tasks.cleanup_old_database_backups",
+        "schedule": 60 * 60 * 24,
+    },
+    "cleanup-invalid-ai-webhook-logs-hourly": {
+        "task": "apps.ai_assistant.tasks.cleanup_invalid_webhook_logs",
+        "schedule": 60 * 60,
+    },
+}
 
 N8N_API_TOKEN = env("N8N_API_TOKEN", default="")
 N8N_WEBHOOK_SECRET = env("N8N_WEBHOOK_SECRET", default="")
+
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
+
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="DemiResults <noreply@demiresults.local>")
+FRONTEND_PASSWORD_RESET_URL = env("FRONTEND_PASSWORD_RESET_URL", default="")
+
+SMS_PROVIDER = env("SMS_PROVIDER", default="console")
+PHONE_AUTH_CODE_TTL_MINUTES = env("PHONE_AUTH_CODE_TTL_MINUTES")
+
+PAYMENT_PROVIDER = env("PAYMENT_PROVIDER", default="local")
+LOCAL_PAYMENT_AUTO_CAPTURE = env("LOCAL_PAYMENT_AUTO_CAPTURE")
+
+BACKUP_DIR = env("BACKUP_DIR", default=str(BASE_DIR / "backups"))
+BACKUP_RETENTION_DAYS = env("BACKUP_RETENTION_DAYS")
+LOG_DIR = Path(env("LOG_DIR", default=str(BASE_DIR / "logs")))
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "demiresults.log",
+            "maxBytes": 10 * 1024 * 1024,
+            "backupCount": 5,
+            "formatter": "standard",
+        },
+    },
+    "root": {
+        "handlers": ["console", "file"],
+        "level": env("DJANGO_LOG_LEVEL", default="INFO"),
+    },
+}
